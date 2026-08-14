@@ -13,7 +13,8 @@
         {
           "name": "every-15-seconds",
           "periodic": {
-            "interval": 5
+            "interval": 5,
+            "start": "2026-08-14T16:00:00-03:00"
           }
         }
       ]
