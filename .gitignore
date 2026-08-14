@@ -4,3 +4,11 @@ obj-*/
 *~
 *.orig
 *.rej
+
+#Local simet-lmapd POC runtime files
+
+lab/hello.log
+lab/queue/*
+lab/run/*
+!lab/queue/.gitkeep
+!lab/run/.gitkeep
