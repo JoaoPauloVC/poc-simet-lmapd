@@ -3,10 +3,6 @@ lab/hello.log
 lab/queue/*
 lab/run/*
 
-# Keep empty runtime directories in Git
-!lab/queue/.gitkeep
-!lab/run/.gitkeep
-
 build/
 obj-*/
 *.swp
