@@ -29,9 +29,9 @@ lmapd depends on a few open source libraries:
 The build system is based on cmake.
 
 ```sh
-$ sudo apt-get install cmake pkg-config libevent-dev libxml2-dev check
-$ git clone https://github.com/schoenw/lmapd.git
-$ cd lmapd
+$ sudo apt-get install cmake pkg-config libevent-dev libxml2-dev libjson-c-dev check 
+$ git clone https://github.com/simetnicbr/simet-lmapd
+$ cd simet-lmapd
 $ mkdir build
 $ cd build
 $ cmake ..
@@ -43,16 +43,36 @@ The binary for the daemon is located at src/lmapd. The binary at src/lmapctl pro
 
 ```sh
 $ ./src/lmapd -h
-usage: lmapd [-f] [-n] [-s] [-v] [-h] [-q queue] [-c config] [-s status]
-       -f fork (daemonize)
-       -n parse config and dump config and exit
-       -s parse config and dump state and exit
-       -q path to queue directory
-       -c path to config directory or file
-       -r path to run directory (pid file and status file)
-       -v show version information and exit
-       -h show brief usage information and exit
-$ ./src/lmapctl help
+usage: simet-lmapd [-j|-x] [-f] [-n] [-s] [-z] [-v] [-h] [-q queue] [-c config] [-s status]       
+      -f fork (daemonize)
+      -n parse config and dump config and exit
+      -s parse config and dump state and exit
+      -z clean the workspace before starting
+      -q path to queue directory
+      -c path to config directory or file (repeat for more paths or files)
+        (an argument of "+" stands for the built-in/default path)
+      -b path to capability directory or file
+      -r path to run directory (pid file and status file)
+      -v show version information and exit
+      -j use JSON for config and reports
+      -x use XML for config and reports (default)
+      -h show brief usage information and exit
+
+$ ./src/lmapctl -h
+usage: lmapctl [-h] [-j|-x] [-q queue] [-c config] [-C dir] [-w [width]] <command> [command arguments]
+	-q path to queue directory
+	-c path to config directory or file (repeat for more paths or files)
+		(an argument of "+" stands for the built-in/default path)
+	-r path to run directory (pid file and status file)
+	-C path in which the program is executed
+	-j use json format when generating output
+	-x use xml format when generating output (default)
+	-i [json|xml] use structured input for reports
+	-w [<width>] wide output when stdout is a tty
+		(use 0 for unlimited. <width> will be 132 if not specified)
+	-h show brief usage information and exit
+
+commands:
   clean       clean the workspace (be careful!)
   config      validate and render lmap configuration
   help        show brief list of commands
@@ -65,7 +85,10 @@ $ ./src/lmapctl help
   version     show version information
 ```
 
-An example config file is located at docs/lmapd-config.xml.
+Example configuration files are available at:
+
+- `test/data/test_load_config.json` (JSON, recommended for simet-lmapd)
+- `doc/lmapd-config.xml` (XML)
 
 ### Development
 Want to contribute? Great!
