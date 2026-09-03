@@ -11,9 +11,10 @@
         "events": {
             "event": [
                 {
-                    "name": "every-15-seconds",
+                    "name": "every-5-seconds",
                     "periodic": {
-                        "interval": 15
+                        "interval": 5,
+                        "start": "2026-09-03T10:30:00-03:00"
                     }
                 }
             ]
@@ -22,7 +23,7 @@
             "schedule": [
                 {
                     "name": "hello-schedule",
-                    "start": "every-15-seconds",
+                    "start": "every-5-seconds",
                     "execution-mode": "sequential",
                     "action": [
                         {
