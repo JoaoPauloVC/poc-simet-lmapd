@@ -306,3 +306,7 @@ Foi adicionado ao Event periódico um horário absoluto de início.
 Com isso, as execuções passaram a permanecer alinhadas à grade temporal definida pelo `start`. No teste realizado, os segundos das execuções terminavam sempre em `0` ou `5`, compatível com um intervalo de 5 segundos ancorado em 10:30:00.
 
 Isso confirma que o `lmapd` calcula as próximas ocorrências a partir da referência temporal definida no Event, inclusive após reload.
+
+### 3) 2 events executando a mesma Task.
+
+Vamos analisar como o daemon se comporta quanto estamos executando rodando uma mesma task com 2 events diferentes. Para o teste, adicionamos um event que roda de 7 em 7 segundos. Da mesma forma, é necessário adicionar um schedule, que vai vincular a Task Configutarion (Que neste caso não tme mudanças) com o event. Vemos que o daemon se comporta como esperado, executando a action corretamente conforme os events.

@@ -16,18 +16,36 @@
                         "interval": 5,
                         "start": "2026-09-03T10:30:00-03:00"
                     }
+                },
+                {
+                    "name": "every-7-seconds",
+                    "periodic": {
+                        "interval": 7,
+                        "start": "2026-09-03T10:30:00-03:00"
+                    }
                 }
             ]
         },
         "schedules": {
             "schedule": [
                 {
-                    "name": "hello-schedule",
+                    "name": "hello-schedule-5s",
                     "start": "every-5-seconds",
                     "execution-mode": "sequential",
                     "action": [
                         {
-                            "name": "run-hello",
+                            "name": "run-hello-5s",
+                            "task": "hello-world"
+                        }
+                    ]
+                },
+                {
+                    "name": "hello-schedule-7s",
+                    "start": "every-7-seconds",
+                    "execution-mode": "sequential",
+                    "action": [
+                        {
+                            "name": "run-hello-7s",
                             "task": "hello-world"
                         }
                     ]
