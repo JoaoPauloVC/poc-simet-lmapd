@@ -203,7 +203,7 @@ lmapd[37452]: [DBG] lmapd_run: event loop starting
 
 Em outro terminal, podemos observar as execuções do programa com:
 
-```
+```sh
 tail -f lab/hello.log
 ```
 
@@ -390,3 +390,71 @@ rapidamente, procurar em `simet_lib_lmapd.sh.in` por:
 
 A instância padrão é chamada `main`, e instâncias adicionais possuem diretórios
 de execução, queue e arquivos de Schedule independentes.
+
+## RoadMap para o Controller
+
+```text
+Controller local
+  instruction.json (10 s)
+        ↓ HTTP
+fetch-instruction.sh
+        ↓
+baixa para arquivo temporário
+        ↓
+lmapctl validate
+        ↓
+se válido:
+substitui hello.json
+        ↓
+lmapctl reload
+        ↓
+Hello World passa de 5 s → 10 s
+```
+
+Neste primeiro momento, estamos considerando sem hash, sem loop, sem necessidade de autenticação ou quaisquer outras complexidades. Vamos primeiro garantir que o ciclo funciona ponta a ponta.
+
+### Procedimento
+
+
+#### Iniciar lmapd
+
+Na raiz do projeto, executar
+
+```bash
+./build/src/lmapd \
+  -j \
+  -b lab/capabilities \
+  -c lab/config/hello.json \
+  -q lab/queue \
+  -r lab/run
+```
+#### Verificar script rodando
+
+Na raiz do projeto
+
+```sh
+tail -f lab/hello.log
+```
+
+#### Iniciar servidor local
+
+Ir para a pasta controller
+
+```sh
+cd lab/controller
+python3 -m http.server 8000
+```
+
+#### Rodar fetch-instruction.sh
+
+Dar permissão de execução para o arquivo `fetch-instruction.sh`
+
+```sh
+chmod +x lab/bin/control/fetch-instruction.sh
+```
+
+Executar script
+
+```sh
+./fetch-instruction.sh
+```
