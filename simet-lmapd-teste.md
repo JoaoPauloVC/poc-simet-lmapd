@@ -415,6 +415,23 @@ Neste primeiro momento, estamos considerando sem hash, sem loop, sem necessidade
 
 ### Procedimento
 
+### Fetch e aplicação manual da Instruction
+
+Foi implementado um script de controle no MA para reproduzir de forma simplificada o mecanismo de atualização estudado no `simet-ma`.
+
+O fluxo testado foi:
+
+Controller HTTP
+→ download da Instruction para arquivo temporário
+→ `lmapctl validate`
+→ substituição da configuração local
+→ `lmapctl reload`
+
+Inicialmente, o MA executava a Task `hello-world` a cada 5 segundos. O Controller disponibilizava uma Instruction com intervalo de 10 segundos.
+
+Após executar manualmente `fetch-instruction.sh`, o servidor registrou uma requisição HTTP `GET` com resposta `200`, o `lmapd` reiniciou seu event loop mantendo o mesmo processo, e as execuções passaram a ocorrer a cada 10 segundos.
+
+O teste comprova que uma configuração disponibilizada pelo Controller pode ser obtida pelo MA, validada e aplicada dinamicamente sem reiniciar manualmente o daemon.
 
 #### Iniciar lmapd
 

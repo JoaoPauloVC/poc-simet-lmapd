@@ -5,6 +5,10 @@
                 {
                     "name": "hello-world",
                     "program": "/home/joao-medicoes-laptop/Documentos/nic.br/orquestracao-medicoes-lmap-controller/poc-simet-lmapd/simet-lmapd/lab/bin/measurement/hello-world.sh"
+                },
+                {
+                    "name": "long-task",
+                    "program": "/home/joao-medicoes-laptop/Documentos/nic.br/orquestracao-medicoes-lmap-controller/poc-simet-lmapd/simet-lmapd/lab/bin/measurement/long-task.sh"
                 }
             ]
         },
@@ -15,6 +19,12 @@
                     "periodic": {
                         "interval": 10,
                         "start": "2026-09-03T10:30:00-03:00"
+                    }
+                },
+                {
+                    "name": "every-34-seconds",
+                    "periodic": {
+                        "interval": 34
                     }
                 }
             ]
@@ -29,6 +39,17 @@
                         {
                             "name": "run-hello-10s",
                             "task": "hello-world"
+                        }
+                    ]
+                },
+                {
+                    "name": "long-task-schedule",
+                    "start": "every-34-seconds",
+                    "execution-mode": "sequential",
+                    "action": [
+                        {
+                            "name": "run-long-task",
+                            "task": "long-task"
                         }
                     ]
                 }
