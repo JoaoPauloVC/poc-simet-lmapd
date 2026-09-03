@@ -297,7 +297,7 @@ Ao derrubar o daemon e subir ele de novo, vemos que a mudança fez efeito e que 
 
 ### 1.1) Alteração fazendo reload
 
-Seguir o processo anterior e, depois de fazer a alteração de 15s para 5s, aplicar o comando reload do lmapctl. Fazendo isso, vemos que o daemon (terminal onde executamos o lmapd) encerra e inicializa novamente e passa a valer a mudança de 15s para 5s. Além disso, através deste processo, vemos que o pid (em lab/run/lmapd.pid) se mantém o mesmo.
+Seguir o processo anterior e, depois de fazer a alteração de 15s para 5s, aplicar o comando reload do lmapctl. Fazendo isso, vemos que o daemon (terminal onde executamos o lmapd) faz o evento loop/configuração novamente e passa a valer a mudança de 15s para 5s. Além disso, através deste processo, vemos que o pid (em lab/run/lmapd.pid) se mantém o mesmo.
 
 ### 2.1) Event periódico com `start` absoluto
 
@@ -310,3 +310,83 @@ Isso confirma que o `lmapd` calcula as próximas ocorrências a partir da refer�
 ### 3) 2 events executando a mesma Task.
 
 Vamos analisar como o daemon se comporta quanto estamos executando rodando uma mesma task com 2 events diferentes. Para o teste, adicionamos um event que roda de 7 em 7 segundos. Da mesma forma, é necessário adicionar um schedule, que vai vincular a Task Configutarion (Que neste caso não tme mudanças) com o event. Vemos que o daemon se comporta como esperado, executando a action corretamente conforme os events.
+
+Com estes testes todos feitos, agora podemos pensr na próxima etapa, de simular um MA buscando informações de um servidor.
+
+## Simulação fetch de Instruction pelo MA
+
+Primeiro, voltamos o projeto ao estado em que só havia um event de 5 segundos. Vamos simular uma mudança do MA de um schedule de 5s para um de 10s, ou seja, o MA irá apenas buscar  uma atualização do Controller que altera o tempo do event (neste momento, ele irá trocar o arquivo inteiro).
+
+A pasta onde estarão as informações do Controller será lab/controller. Nela, teremos uma nova isntruction que será a passada do Controller para o MA (instruction.json). A intenção é que a instruction seja passada para o MA, que deve validá-la, garantir que está correta, e então aplicar as mudanças recebidas (neste cenário, seria atualizar o arquivo hello.json).
+
+Para iniciar, vamos entrar na pasta `controller` criada e vamos simular um servidor local, usando python, com o comando
+
+```sh
+python3 -m http.server 8000
+```
+
+Em outro terminal, na raiz do projeto, vamos rodar
+
+```sh
+curl http://localhost:8000/instruction.json
+```
+
+O esperado é que apareça no terminal o instruction.json que foi gerado. Queremos que o MA receba este arquivo, valide-o, e faça as alterações no seu próprio arquivo JSON.
+
+Neste ponto, o teste comprova apenas que uma Instruction pode ser disponibilizada por HTTP e obtida pelo MA. Ainda não implementamos sua aplicação no `lmapd`.
+
+Antes de criar um mecanismo próprio para baixar, validar, substituir a configuração local e executar `reload`, será analisado o funcionamento atual do `simet-ma`, que já possui o script `simet_lmap-fetch-schedule.sh`.
+
+
+## Investigação do mecanismo atual do SIMET-MA
+
+Foi identificado que o SIMET-MA já possui um mecanismo próprio para buscar Schedules no Controller, implementado principalmente por `simet_lmap-fetch-schedule.sh`.
+
+O fluxo observado no código é aproximadamente:
+
+Controller  
+→ disponibiliza a configuração requerida
+
+→ MA realiza requisição HTTP  
+  - função `simet_api_lmapgetsched()` e `simet_api_lmapgetsched_v2()`. Chamadas `curl`
+
+→ configuração é armazenada em arquivo temporário  
+  - função `newoutfile()` --> `mktemp`
+
+→ nova Schedule é comparada com a Schedule atualmente instalada  
+  - função `activate_schedule()` --> `NEWSCHED_HASH` e `OLDSCHED_HASH`
+
+→ a nova configuração é validada antes de ser aplicada  
+  - em `activate_schedule()`, `simet_lmap_verifyconfig` --> chama `lmapd_lmapctl_validate` --> em `simet_lib_lmapd.sh.in`, chama `lmapd_lmapctl_validate()` e executa `lmapctl ... validate`
+
+→ o arquivo validado substitui a Schedule local  
+  - em`activate_schedule()` --> `mv -f "$OUTFILE" "$SCHED_FILENAME"`
+  - o nome do arquivo de Schedule pode ser encontrado em `lmapd_get_sched_filename()` --> retorna `.../lmap-schedule.json`
+
+→ o `simet-lmapd` é informado da mudança por meio de reload  
+  - `force_reload` --> depois por `lmapd_lmapctl_reload`
+  - em `simet_lib_lmapd.sh.in`, essa função executa `lmapctl -j -r ... reload`
+
+Também foi observado que o Controller pode responder semanticamente de formas diferentes. Isso pode ser encontrado dentro de `simet_lmap_download_schedule()`, no `case "$APIRES"`:
+
+- `200`: nova Schedule recebida do Controller;
+- `204`: Controller solicita retorno para uma Schedule local;
+- `304`: Controller solicita que a Schedule atual seja mantida;
+- `410`: Controller solicita que o MA pare de realizar medições, utilizando
+  `lmap-empty-schedule.json`.
+
+### Conclusão
+
+A implementação atual inicia a comunicação a partir do MA. Vemos isso através das funções `simet_api_lmapgetsched()` e `simet_api_lmapgetsched_v2()`, em que o próprio script executado no MA realiza chamadas `curl` ao endpoint do Controller. Portanto, o mecanismo atual apresenta comportamento de pull.
+
+O código também suporta múltiplas instâncias LMAP. Para consultar isso
+rapidamente, procurar em `simet_lib_lmapd.sh.in` por:
+
+- `lmapd_get_instance_list()`
+- `LMAP_EXTRA_INSTANCES`
+- `lmapd_get_rundir()`
+- `lmapd_get_queuedir()`
+- `lmapd_get_sched_filename()`
+
+A instância padrão é chamada `main`, e instâncias adicionais possuem diretórios
+de execução, queue e arquivos de Schedule independentes.
