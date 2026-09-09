@@ -22,3 +22,9 @@ qua 09 set 2026 16:04:48 -03 - END long-task
 qua 09 set 2026 16:04:52 -03 - START long-task
 qua 09 set 2026 16:05:22 -03 - END long-task
 qua 09 set 2026 16:05:26 -03 - START long-task
+qua 09 set 2026 16:05:56 -03 - END long-task
+qua 09 set 2026 16:06:00 -03 - START long-task
+qua 09 set 2026 16:06:30 -03 - END long-task
+qua 09 set 2026 16:06:34 -03 - START long-task
+qua 09 set 2026 16:07:04 -03 - END long-task
+qua 09 set 2026 16:07:08 -03 - START long-task
