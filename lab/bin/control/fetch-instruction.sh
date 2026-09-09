@@ -8,7 +8,7 @@ LAB_DIR="$(cd "${PROJECT_DIR}/lab" && pwd)"
 
 LMAPCTL="${PROJECT_DIR}/build/src/lmapctl"
 
-INSTRUCTION_URL="http://localhost:8000/instruction.json"
+INSTRUCTION_URL="http://localhost:4000/v1/agents/test-ma/required-config"
 CURRENT_INSTRUCTION="${LAB_DIR}/config/config.json"
 TEMPORARY_INSTRUCTION="$(mktemp "${LAB_DIR}/config/.instruction.XXXXXX")"
 
