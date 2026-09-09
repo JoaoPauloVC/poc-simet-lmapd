@@ -524,3 +524,19 @@ Orquestrador
 ├── aplica regras e conflitos
 ├── gera agenda efetiva
 └── publica desired Schedule no Controller
+
+
+## Nova "config" agora com o Phoenix
+
+./build/src/lmapd \
+  -j \
+  -b lab/capabilities \
+  -c lab/config/config.json \
+  -q lab/queue \
+  -r lab/run
+
+Em outro terminal
+
+em lab/logs:
+tail -f *
+

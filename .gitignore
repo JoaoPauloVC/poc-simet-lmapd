@@ -1,5 +1,5 @@
 # Local simet-lmapd POC runtime files
-lab/hello.log
+lab/logs/*
 lab/queue/*
 lab/run/*
 
