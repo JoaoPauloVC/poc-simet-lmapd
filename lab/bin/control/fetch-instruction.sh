@@ -9,7 +9,7 @@ LAB_DIR="$(cd "${PROJECT_DIR}/lab" && pwd)"
 LMAPCTL="${PROJECT_DIR}/build/src/lmapctl"
 
 INSTRUCTION_URL="http://localhost:8000/instruction.json"
-CURRENT_INSTRUCTION="${LAB_DIR}/config/hello.json"
+CURRENT_INSTRUCTION="${LAB_DIR}/config/config.json"
 TEMPORARY_INSTRUCTION="$(mktemp "${LAB_DIR}/config/.instruction.XXXXXX")"
 
 cleanup() {
