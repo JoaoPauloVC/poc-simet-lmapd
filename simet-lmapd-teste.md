@@ -475,3 +475,52 @@ Executar script
 ```sh
 ./fetch-instruction.sh
 ```
+
+### Teste de reload com Action em execução
+
+Foi criada uma Task `long-task` que registra `START`, aguarda 30 segundos e então registra `END`.
+
+Durante uma execução da `long-task`, foi realizado um fetch de nova Instruction seguido de `lmapctl reload`.
+
+Observação:
+
+- uma execução anterior terminou normalmente;
+- uma nova execução iniciou às `10:51:13`;
+- após o reload, não houve registro de `END` correspondente.
+
+Conclusão: no comportamento observado, o reload interrompe uma Action que esteja em execução.
+
+Isso confirma que a aplicação de uma nova Instruction precisa considerar o momento seguro de atualização no MA.
+
+## RoadMap Controller e Orquestrador
+
+Após conversa com o Henrique, entendimento do funcionamento do simet-ma, algumas decisões foram:
+
+Controller novo
+│
+├── mantém comunicação iniciada pelo MA (pull)
+|      Já existe uma comunicação iniciado pelo MA. Manteremos isso e vamos verificar periodicidade da comunicação.
+|
+├── suporta API v1 e v2
+│
+├── recebe reported state
+│
+├── registra last_seen
+│
+├── mantém desired Schedule por MA/instância
+│
+├── responde:
+│      200 → Schedule completa
+│      204 → Schedule local
+│      304 → mantém atual
+│      410 → parar
+│
+└── recebe confirmação indireta pelo novo reported state
+
+Orquestrador
+│
+├── recebe demandas
+├── usa estado/capabilities conhecidos
+├── aplica regras e conflitos
+├── gera agenda efetiva
+└── publica desired Schedule no Controller
