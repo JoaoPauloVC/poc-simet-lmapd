@@ -21,11 +21,13 @@ RUN="${LAB_DIR}/run"
 
 TEMPORARY_STATE="$(mktemp "${LAB_DIR}/config/.reported-state.XXXXXX")"
 TEMPORARY_INSTRUCTION="$(mktemp "${LAB_DIR}/config/.instruction.XXXXXX")"
+TEMPORARY_STATE_AFTER="$(mktemp "${LAB_DIR}/config/.reported-state-after.XXXXXX")"
 
 # Cleanup temporary files on exit
 cleanup() {
   rm -f "${TEMPORARY_STATE}"
   rm -f "${TEMPORARY_INSTRUCTION}"
+  rm -f "${TEMPORARY_STATE_AFTER}"
 }
 
 trap cleanup EXIT
@@ -76,3 +78,23 @@ mv "${TEMPORARY_INSTRUCTION}" "${CURRENT_INSTRUCTION}"
   -r "${RUN}" \
   -c "${CURRENT_INSTRUCTION}" \
   reload
+
+# Generate state after applying the new Instruction
+"${PROJECT_DIR}/build/src/lmapd" \
+  -j \
+  -s \
+  -b "${CAPABILITIES}" \
+  -c "${CURRENT_INSTRUCTION}" \
+  -q "${QUEUE}" \
+  -r "${RUN}" \
+  > "${TEMPORARY_STATE_AFTER}" || true
+
+# Validate generated state JSON
+jq empty "${TEMPORARY_STATE_AFTER}"
+
+# Report updated state to Controller
+curl --fail --silent --show-error \
+  -X PUT \
+  -H "Content-Type: application/json" \
+  --data-binary @"${TEMPORARY_STATE_AFTER}" \
+  "${STATE_URL}"
